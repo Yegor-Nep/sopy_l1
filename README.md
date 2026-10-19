@@ -75,6 +75,18 @@ void parse_text_file(const char *path) {
     fclose(file);
 }
 ```
+```c
+char *separation = strstr(package, "==");
+if(separation == NULL) {
+    fprintf(stderr, "package name should be in format <PACKAGE_NAME>==<VERSION>\n");
+    exit(EXIT_FAILURE);
+}
+
+*separation = '\0'; 
+
+char *pName = package;        
+char *pVersion = separation+2; 
+```
 
 ## 4. Rekurencyjne przeglądanie katalogów 
 
@@ -116,7 +128,7 @@ void traverse_dir(const char *dir_path) {
 ```c
 #define CUTBUFF 64
 
-void read_binary_database(const char *path, const char *index_dir) {
+void read_database(const char *path, const char *index_dir) {
     int fd = open(path, O_RDONLY);
     if (fd == -1) ERR("open");
 
@@ -151,4 +163,86 @@ void read_binary_database(const char *path, const char *index_dir) {
     if (bytes_read == -1) ERR("readv");
     close(fd);
 }
+```
+## 6. usuniecei jakiejś linii z pliku która spełnia pewien warunek
+```c
+char buffer[100];
+char temp[100];
+FILE *file, *newFile;
+
+if((file = fopen("requirements", "r")) == NULL) {
+    ERR("fopen");
+}
+if((newFile = fopen("requirements.temp", "w")) == NULL) {
+    ERR("fopen");
+}
+
+while(fgets(buffer, 100, file)) {
+    sscanf(buffer, "%s", temp);
+    if(strcmp(temp, name) == 0) continue; 
+    fputs(buffer, newFile);
+}
+
+fclose(file);
+fclose(newFile);
+
+unlink("requirements"); 
+rename("requirements.temp", "requirements"); 
+```
+
+## 6. Szablon do getopt
+```c
+int c;
+char *name[argc];   
+int itr = 0;
+char *pName = NULL;
+char *pDelete = NULL;
+
+while ((c = getopt(argc, argv, "cv:i:r:")) != -1) {
+    switch (c) {
+        case 'c':
+            break;
+        case 'v':
+            v_arg = true;
+            name[itr] = optarg; // Przypisanie samego wskaźnika, bez strcpy
+            itr++;
+            break;
+        case 'i':
+            break;
+        case 'r':
+            pDelete = optarg;
+            break;
+        case '?':
+        default:
+            usage(argv[0]);
+    }
+}
+```
+## 7. rozszerzenie pliku
+```c
+bool check_extension(const char* name, const char* extension) {
+    const char* ldot = strrchr(name, '.');
+    if (ldot != NULL) {
+        return strncmp(ldot + 1, extension, strlen(extension)) == 0;
+    }
+    return false;
+}
+```
+
+## 8. czytanie tego co zostało po flagach getopt
+```c
+// jakieś tam getopt
+
+// Czytanie tego, co zostało po flagach np. ./program -v -c plik1 plik2
+for (int i = optind; i < argc; i++) {
+    printf("%s\n", argv[i]);
+}
+```
+
+## 9. zmienne srodowiskowe
+```c
+man 3p environ
+getenv()
+setenv()
+putenv()
 ```
