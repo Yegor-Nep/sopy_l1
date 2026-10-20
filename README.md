@@ -24,7 +24,7 @@ void usage(char *pname)
 ```
 
 
-# remembet to free();
+# remember to free();
 ```c
 char* join_paths(const char* path1, const char* path2) {
     char* res;
